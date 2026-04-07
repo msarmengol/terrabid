@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Plataforma interactiva de subastas de fincas rústicas en Huelva y Cáceres.">
+    <title>TerraBid | Subastas Rústicas Reales</title>
+    
+    <!-- Preconnect Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Modern UI Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js para visualización de datos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app-container">
+        <!-- Floating Animated Background Effect -->
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        
+        <!-- Sidebar Navigation & Filters -->
+        <aside class="glass-panel sidebar">
+            <div class="brand">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                </div>
+                <h2>TerraBid</h2>
+            </div>
+            
+            <div class="filters-container">
+                <div class="filter-group">
+                    <label for="filter-provincia">Provincia</label>
+                    <div class="custom-select-wrapper">
+                        <select id="filter-provincia" class="glass-select">
+                            <option value="all">Todas las Provincias</option>
+                            <option value="Huelva">Huelva</option>
+                            <option value="Cáceres">Cáceres</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label for="filter-procedimiento">Procedimiento</label>
+                    <div class="custom-select-wrapper">
+                        <select id="filter-procedimiento" class="glass-select">
+                            <option value="all">Todos los Procedimientos</option>
+                            <option value="Subasta Judicial">Subasta Judicial</option>
+                            <option value="Subasta Administrativa">Subasta Administrativa</option>
+                            <option value="Concurso de Acreedores">Concurso de Acreedores</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="stats-box">
+                    <span class="stat-value" id="count-results">0</span>
+                    <span class="stat-label">Resultados</span>
+                </div>
+                <!-- Export to CSV Button -->
+                <button id="export-csv" class="btn-primary">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Exportar a CSV
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content (Feed) -->
+        <main class="content-area">
+            <header class="content-header glass-panel">
+                <div class="header-titles">
+                    <h1>Directorio de Subastas Rústicas</h1>
+                    <p>Oportunidades de inversión agrícola actualizadas</p>
+                </div>
+                <div class="header-status">
+                    <span class="status-indicator"></span>
+                    <span>Live Data</span>
+                </div>
+            </header>
+
+            <!-- Visualización de Datos -->
+            <div class="chart-container glass-panel reveal-anim" style="padding: 1.5rem; margin-bottom: 0.5rem; position: relative; height: 350px; animation-delay: 0.2s;">
+                <h3 style="font-family: var(--font-mono); font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 1rem;">Nube de Puntos: Provincias vs Procedimientos</h3>
+                <div style="position: relative; height: 260px; width: 100%;">
+                    <canvas id="scatterChart"></canvas>
+                </div>
+            </div>
+
+            <div class="results-grid" id="results-container">
+                <!-- Data will be injected here via JavaScript -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Template for a single card (to be cloned by JS) -->
+    <template id="card-template">
+        <article class="auction-card glass-panel reveal-anim">
+            <div class="card-header">
+                <div class="card-badges">
+                    <span class="badge badge-primary" data-provincia>Provincia</span>
+                    <span class="badge badge-secondary" data-procedimiento>Procedimiento</span>
+                </div>
+                <span class="card-id" data-id>#ID</span>
+            </div>
+            <div class="card-body">
+                <h3 class="card-title" data-municipio>Municipio</h3>
+                <p class="card-type" data-tipo>Tipo de Finca</p>
+                
+                <div class="card-metrics">
+                    <div class="metric">
+                        <span class="metric-label">Superficie</span>
+                        <span class="metric-value"><strong data-superficie>0</strong> ha</span>
+                    </div>
+                    <div class="metric highlight">
+                        <span class="metric-label">Valor Subasta</span>
+                        <span class="metric-value"><strong data-valor>0</strong> €</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="footer-info">
+                    <span class="info-item">Cierre: <strong data-cierre>Fecha</strong></span>
+                    <span class="info-item source-tag" data-fuente>Fuente</span>
+                </div>
+                <a href="#" class="btn-icon" title="Ver Detalles">
+                    →
+                </a>
+            </div>
+        </article>
+    </template>
+
+    <script src="script.js"></script>
+</body>
+</html>

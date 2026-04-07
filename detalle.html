@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Detalle de subasta rústica en TerraBid.">
+    <title>TerraBid | Detalle de Subasta</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app-container" class="detail-layout">
+        <!-- Floating Animated Background Effect -->
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        
+        <main class="content-area detail-area">
+            <header class="content-header glass-panel">
+                <div class="header-titles">
+                    <a href="index.html" class="btn-back">← Volver al Directorio</a>
+                </div>
+            </header>
+
+            <div class="results-grid" style="grid-template-columns: 1fr;">
+                <article class="auction-card glass-panel reveal-anim detail-card" id="detail-container">
+                    <div style="text-align: center; padding: 3rem;">Cargando detalles de la subasta...</div>
+                </article>
+            </div>
+        </main>
+    </div>
+
+    <!-- Template for the details card -->
+    <template id="detail-template">
+        <div class="card-header detail-header">
+            <div class="card-badges">
+                <span class="badge badge-primary" data-provincia></span>
+                <span class="badge badge-secondary" data-procedimiento></span>
+            </div>
+            <span class="card-id" data-id></span>
+        </div>
+        
+        <div class="card-body detail-body">
+            <h1 class="card-title detail-title" data-municipio></h1>
+            <p class="card-type detail-type" data-tipo></p>
+            
+            <div class="detail-grid">
+                <div class="detail-info-block glass-panel">
+                    <h3>Datos Generales</h3>
+                    <ul class="detail-list">
+                        <li><strong>Provincia:</strong> <span data-provincia-text></span></li>
+                        <li><strong>Municipio:</strong> <span data-municipio-text></span></li>
+                        <li><strong>Tipo de Finca:</strong> <span data-tipo-text></span></li>
+                    </ul>
+                </div>
+
+                <div class="detail-info-block glass-panel">
+                    <h3>Subasta</h3>
+                    <ul class="detail-list">
+                        <li><strong>Procedimiento:</strong> <span data-procedimiento-text></span></li>
+                        <li><strong>Fecha de Cierre:</strong> <span data-cierre></span></li>
+                        <li><strong>Fuente Original:</strong> <span data-fuente></span></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card-metrics detail-metrics">
+                <div class="metric">
+                    <span class="metric-label">Superficie Total</span>
+                    <span class="metric-value"><strong data-superficie></strong> ha</span>
+                </div>
+                <div class="metric highlight">
+                    <span class="metric-label">Valor Subasta</span>
+                    <span class="metric-value"><strong data-valor></strong> €</span>
+                </div>
+            </div>
+
+            <div class="detail-actions">
+                <a href="#" target="_blank" rel="noopener noreferrer" class="btn-primary" data-link>
+                    Ver en portal oficial (Origen)
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left: 8px;">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                        <polyline points="15 3 21 3 21 9"></polyline>
+                        <line x1="10" y1="14" x2="21" y2="3"></line>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </template>
+
+    <script src="detalle.js"></script>
+</body>
+</html>

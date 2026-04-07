@@ -1,0 +1,74 @@
+[
+  {
+    "id": "SUB-1029",
+    "provincia": "Huelva",
+    "municipio": "Almonte",
+    "procedimiento": "Subasta Judicial",
+    "tipo": "Finca Rústica",
+    "superficie_ha": 12.5,
+    "valor_subasta": 150000,
+    "fecha_cierre": "2026-05-15",
+    "fuente": "BOE",
+    "link": "#"
+  },
+  {
+    "id": "SUB-1035",
+    "provincia": "Cáceres",
+    "municipio": "Plasencia",
+    "procedimiento": "Subasta Administrativa",
+    "tipo": "Finca Rústica (Regadío)",
+    "superficie_ha": 35.0,
+    "valor_subasta": 280000,
+    "fecha_cierre": "2026-06-10",
+    "fuente": "Portal Privado X",
+    "link": "#"
+  },
+  {
+    "id": "SUB-1102",
+    "provincia": "Huelva",
+    "municipio": "Gibraleón",
+    "procedimiento": "Concurso de Acreedores",
+    "tipo": "Parcela Rústica",
+    "superficie_ha": 4.2,
+    "valor_subasta": 85000,
+    "fecha_cierre": "2026-04-20",
+    "fuente": "Junta de Andalucía",
+    "link": "#"
+  },
+  {
+    "id": "SUB-1150",
+    "provincia": "Cáceres",
+    "municipio": "Trujillo",
+    "procedimiento": "Subasta Judicial",
+    "tipo": "Dehesa",
+    "superficie_ha": 150.0,
+    "valor_subasta": 1200000,
+    "fecha_cierre": "2026-05-30",
+    "fuente": "BOE",
+    "link": "#"
+  },
+  {
+    "id": "SUB-1188",
+    "provincia": "Huelva",
+    "municipio": "Lepe",
+    "procedimiento": "Subasta Administrativa",
+    "tipo": "Finca Rústica",
+    "superficie_ha": 2.5,
+    "valor_subasta": 95000,
+    "fecha_cierre": "2026-07-01",
+    "fuente": "Aeat",
+    "link": "#"
+  },
+  {
+    "id": "SUB-1205",
+    "provincia": "Cáceres",
+    "municipio": "Moraleja",
+    "procedimiento": "Concurso de Acreedores",
+    "tipo": "Terreno Agrícola",
+    "superficie_ha": 18.0,
+    "valor_subasta": 115000,
+    "fecha_cierre": "2026-08-15",
+    "fuente": "Portal Concursal",
+    "link": "#"
+  }
+]
