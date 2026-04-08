@@ -136,9 +136,17 @@ def scrape_boe_region(provincia_nombre, id_provincia):
 def run_scraper():
     logging.info("Iniciando Scraper del BOE...")
     
-    # Huelva = 21, Cáceres = 10 (Códigos postales / ID BOE estándar)
+    # 8 provincias de Andalucía + 2 de Extremadura (Códigos INE homologables a BOE)
     provincias = [
+        {"nombre": "Almería", "id": 4},
+        {"nombre": "Cádiz", "id": 11},
+        {"nombre": "Córdoba", "id": 14},
+        {"nombre": "Granada", "id": 18},
         {"nombre": "Huelva", "id": 21},
+        {"nombre": "Jaén", "id": 23},
+        {"nombre": "Málaga", "id": 29},
+        {"nombre": "Sevilla", "id": 41},
+        {"nombre": "Badajoz", "id": 6},
         {"nombre": "Cáceres", "id": 10}
     ]
     
@@ -152,21 +160,11 @@ def run_scraper():
         logging.warning("No se ha extraído ninguna subasta válida. Terminando proceso.")
         return
 
-    # Fusionar con antiguas (Sin perder las que tal vez no salen ya pero que añadiste manual)
-    # Dependerá de tu lógica si quieres pisarlas o fusionarlas. Vamos a pisar/actualizar por ID.
-    datos_actuales = load_existing_data()
-    
-    # Crear un diccionario para evitar duplicados por ID
-    mapa_datos = {d['id']: d for d in datos_actuales}
-    
-    for sub in nuevas_subastas:
-        mapa_datos[sub['id']] = sub
-        
-    # Convertir a array nuevamente
-    datos_finales = list(mapa_datos.values())
-    
-    save_data(datos_finales)
-    logging.info("Proceso completado exitosamente.")
+    # Como deseamos un reinicio limpio cada vez que se dispara una extracción exitosa,
+    # simplemente guardamos directamente el nuevo bloque de subastas extraídas.
+    # Así se eliminan los datos viejos y los 'mock' antiguos de golpes anteriores.
+    save_data(nuevas_subastas)
+    logging.info("Proceso completado exitosamente: Datos reemplazados desde cero.")
 
 if __name__ == "__main__":
     run_scraper()
