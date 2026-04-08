@@ -70,5 +70,29 @@
     "fecha_cierre": "2026-08-15",
     "fuente": "Portal Concursal",
     "link": "#"
+  },
+  {
+    "id": "TEST-HUE-1775646085",
+    "provincia": "Huelva",
+    "municipio": "Subasta Recién Extraída",
+    "procedimiento": "Subasta Judicial",
+    "tipo": "Parcela Rústica",
+    "superficie_ha": 55.0,
+    "valor_subasta": 125000,
+    "fecha_cierre": "2026-04-08",
+    "fuente": "BOE Automático",
+    "link": "https://subastas.boe.es/"
+  },
+  {
+    "id": "TEST-CÁC-1775646086",
+    "provincia": "Cáceres",
+    "municipio": "Subasta Recién Extraída",
+    "procedimiento": "Subasta Judicial",
+    "tipo": "Parcela Rústica",
+    "superficie_ha": 55.0,
+    "valor_subasta": 125000,
+    "fecha_cierre": "2026-04-08",
+    "fuente": "BOE Automático",
+    "link": "https://subastas.boe.es/"
   }
 ]
