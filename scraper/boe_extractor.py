@@ -49,8 +49,8 @@ def run_scraper():
                 page.goto("https://subastas.boe.es/subastas_ava.php", wait_until="domcontentloaded")
                 
                 # Rellenar formulario (Inmuebles + Provincia)
-                page.locator("select[name='id_bien']").select_option("1")
-                page.locator("select[name='id_provincia']").select_option(prov['id'])
+                page.locator("input[id='idTipoBienI']").check(force=True)
+                page.locator("select[name='dato[8]']").select_option(prov['id'])
                 
                 # Clic en buscar y esperar la carga de la siguiente página
                 page.locator("input[value='Buscar']").click()
