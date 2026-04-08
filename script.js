@@ -61,25 +61,46 @@ function populateDynamicFilters() {
     const uniqueProvincias = [...new Set(allAuctions.map(a => a.provincia))].sort();
     const uniqueProcedimientos = [...new Set(allAuctions.map(a => a.procedimiento))].sort();
 
-    filterProvincia.innerHTML = '<option value="all">Todas las Provincias</option>';
-    uniqueProvincias.forEach(prov => filterProvincia.add(new Option(prov, prov)));
+    filterProvincia.innerHTML = '';
+    uniqueProvincias.forEach(prov => {
+        const label = document.createElement('label');
+        label.className = 'checkbox-label';
+        label.innerHTML = `<input type="checkbox" value="${prov}" checked> ${prov}`;
+        
+        // Asignar el event listener a cada checkbox directamente (ya que el viejo "change" estaba en el select padre)
+        label.querySelector('input').addEventListener('change', applyFilters);
+        
+        filterProvincia.appendChild(label);
+    });
 
-    filterProcedimiento.innerHTML = '<option value="all">Todos los Procedimientos</option>';
-    uniqueProcedimientos.forEach(proc => filterProcedimiento.add(new Option(proc, proc)));
+    filterProcedimiento.innerHTML = '';
+    uniqueProcedimientos.forEach(proc => {
+        const label = document.createElement('label');
+        label.className = 'checkbox-label';
+        label.innerHTML = `<input type="checkbox" value="${proc}" checked> ${proc}`;
+        
+        label.querySelector('input').addEventListener('change', applyFilters);
+        
+        filterProcedimiento.appendChild(label);
+    });
 }
 
 /**
  * Filtra los datos según el estado de los <select>
  */
 function applyFilters() {
-    const prov = filterProvincia.value;
-    const proc = filterProcedimiento.value;
+    const checkedProvincias = Array.from(document.querySelectorAll('#filter-provincia input:checked')).map(cb => cb.value);
+    const checkedProcedimientos = Array.from(document.querySelectorAll('#filter-procedimiento input:checked')).map(cb => cb.value);
 
     filteredAuctions = allAuctions.filter(auction => {
-        const matchProvincia = prov === 'all' || auction.provincia === prov;
-        const matchProcedimiento = proc === 'all' || auction.procedimiento === proc;
+        const matchProvincia = checkedProvincias.includes(auction.provincia);
+        const matchProcedimiento = checkedProcedimientos.includes(auction.procedimiento);
         return matchProvincia && matchProcedimiento;
     });
+
+    // Validar visualmente cuentas
+    const resultCount = document.getElementById('result-count');
+    if (resultCount) resultCount.textContent = filteredAuctions.length;
 
     renderCards(filteredAuctions);
     renderChart(filteredAuctions);
@@ -101,26 +122,15 @@ function renderChart(data) {
     
     if (data.length === 0) return;
 
-    // Ejes definidos de forma completamente dinámica para escalar desde 1 hasta 50 provincias sin retocar el código
-    const provincias = [...new Set(data.map(item => item.provincia))].sort();
-    const procedimientos = [...new Set(data.map(item => item.procedimiento))].sort();
-
-    // Mapear los datos añadiendo "jitter" (ruido visual) para que no se superpongan exactamente
+    // Generamos un gráfico basado en valor (€) y superficie (ha) 
     const points = data.map(item => {
-        let xBase = procedimientos.indexOf(item.procedimiento);
-        let yBase = provincias.indexOf(item.provincia);
         
-        // Si no está en el listado mapeado lo mandamos a un índice extra (o -1)
-        if (xBase === -1) xBase = procedimientos.length;
-        if (yBase === -1) yBase = provincias.length;
-
-        // Ruido para dispersar visualmente y que parezca una nube real
-        const jitterX = (Math.random() - 0.5) * 0.4;
-        const jitterY = (Math.random() - 0.5) * 0.4;
+        let sup = parseFloat(item.superficie_ha) || 0;
+        let val = parseFloat(item.valor_subasta) || 0;
 
         return {
-            x: xBase + jitterX,
-            y: yBase + jitterY,
+            x: sup,
+            y: val,
             auctionData: item
         };
     });
@@ -135,14 +145,14 @@ function renderChart(data) {
         type: 'scatter',
         data: {
             datasets: [{
-                label: 'Propiedades',
+                label: 'Oportunidades Inmobiliarias',
                 data: points,
                 backgroundColor: 'rgba(16, 185, 129, 0.6)', 
                 borderColor: '#10b981',
-                pointRadius: 7,
-                pointHoverRadius: 10,
-                borderWidth: 2,
-                pointHoverBackgroundColor: '#10b981'
+                pointRadius: 6,
+                pointHoverRadius: 9,
+                borderWidth: 1,
+                pointHoverBackgroundColor: '#FFF'
             }]
         },
         options: {
@@ -152,57 +162,56 @@ function renderChart(data) {
                 legend: { display: false },
                 tooltip: {
                     backgroundColor: 'rgba(15, 23, 42, 0.95)',
-                    titleColor: '#fff',
+                    titleColor: '#10b981',
                     bodyColor: '#cbd5e1',
                     padding: 12,
                     borderColor: 'rgba(255, 255, 255, 0.1)',
                     borderWidth: 1,
                     callbacks: {
-                        label: function(context) {
-                            const auc = context.raw.auctionData;
-                            const formatPrice = new Intl.NumberFormat('es-ES').format(auc.valor_subasta);
+                        label: function (context) {
+                            const raw = context.raw.auctionData;
                             return [
-                                `Ref: ${auc.id} - ${auc.municipio}`,
-                                `Procedimiento: ${auc.procedimiento}`,
-                                `Precio: ${formatPrice} €`
+                                `📌 ${raw.procedimiento} - ${raw.provincia}`,
+                                `📐 Superficie: ${raw.superficie_ha} ha`,
+                                `💰 Valor: €${parseFloat(raw.valor_subasta).toLocaleString()}`
                             ];
                         }
                     }
                 }
             },
-            onClick: (event, elements) => {
-                // Al hacer clic redirige al detalle.html
-                if (elements.length > 0) {
-                    const idx = elements[0].index;
-                    const auc = points[idx].auctionData;
-                    window.location.href = `detalle.html?id=${auc.id}`;
-                }
-            },
-            onHover: (event, chartElement) => {
-                event.native.target.style.cursor = chartElement[0] ? 'pointer' : 'default';
-            },
             scales: {
                 x: {
-                    min: -0.5,
-                    max: procedimientos.length - 0.5,
-                    ticks: {
-                        stepSize: 1,
-                        callback: function(value) {
-                            return procedimientos[Math.round(value)] || '';
-                        }
+                    type: 'linear',
+                    position: 'bottom',
+                    title: {
+                        display: true,
+                        text: 'Superficie (Hectáreas)',
+                        color: 'rgba(255, 255, 255, 0.7)'
                     },
                     grid: { color: 'rgba(255, 255, 255, 0.05)' }
                 },
                 y: {
-                    min: -0.5,
-                    max: provincias.length - 0.5,
-                    ticks: {
-                        stepSize: 1,
-                        callback: function(value) {
-                            return provincias[Math.round(value)] || '';
-                        }
+                    title: {
+                        display: true,
+                        text: 'Valor Tasación (€)',
+                        color: 'rgba(255, 255, 255, 0.7)'
                     },
-                    grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                    grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                    ticks: {
+                        callback: function(value) {
+                            if (value >= 1000) return '€' + (value / 1000) + 'K';
+                            return '€' + value;
+                        }
+                    }
+                }
+            },
+            onClick: (e, elements) => {
+                if (elements.length > 0) {
+                    const idx = elements[0].index;
+                    const datasetId = elements[0].datasetIndex;
+                    const ad = scatterChart.data.datasets[datasetId].data[idx].auctionData;
+                    
+                    window.location.href = `detalle.html?id=${encodeURIComponent(ad.id)}`;
                 }
             }
         }
