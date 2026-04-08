@@ -1,0 +1,40 @@
+name: Daily Scraper (TerraBid)
+
+on:
+  schedule:
+    - cron: '0 6,18 * * *'
+  workflow_dispatch:
+
+jobs:
+  scrape-and-update:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Descargar código (Checkout repository)
+        uses: actions/checkout@v4
+
+      - name: Configurar entorno Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f scraper/requirements.txt ]; then pip install -r scraper/requirements.txt; fi
+
+      - name: Ejecutar Scraper (BOE)
+        run: |
+          python scraper/boe_extractor.py
+
+      - name: Hacer Commit y Push con los nuevos datos
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
+          git add data.json
+          git commit -m "Auto-update: Datos de subastas renovados por scraper" || echo "No hay cambios para subir."
+          git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
