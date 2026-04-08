@@ -43,6 +43,8 @@ async function fetchData() {
         
         allAuctions = await response.json();
         
+        populateDynamicFilters();
+        
         // Initial render without filters
         applyFilters();
         
@@ -50,6 +52,20 @@ async function fetchData() {
         console.error('Error fetching data:', error);
         showError('No se pudieron cargar los datos. Verifica el archivo data.json o la conexión.');
     }
+}
+
+/**
+ * Recopila todas las categorías que existen en la DB descargada y auto genera opciones de los desplegables laterales
+ */
+function populateDynamicFilters() {
+    const uniqueProvincias = [...new Set(allAuctions.map(a => a.provincia))].sort();
+    const uniqueProcedimientos = [...new Set(allAuctions.map(a => a.procedimiento))].sort();
+
+    filterProvincia.innerHTML = '<option value="all">Todas las Provincias</option>';
+    uniqueProvincias.forEach(prov => filterProvincia.add(new Option(prov, prov)));
+
+    filterProcedimiento.innerHTML = '<option value="all">Todos los Procedimientos</option>';
+    uniqueProcedimientos.forEach(proc => filterProcedimiento.add(new Option(proc, proc)));
 }
 
 /**
@@ -85,9 +101,9 @@ function renderChart(data) {
     
     if (data.length === 0) return;
 
-    // Ejes definidos
-    const provincias = ["Huelva", "Cáceres"];
-    const procedimientos = ["Subasta Judicial", "Subasta Administrativa", "Concurso de Acreedores"];
+    // Ejes definidos de forma completamente dinámica para escalar desde 1 hasta 50 provincias sin retocar el código
+    const provincias = [...new Set(data.map(item => item.provincia))].sort();
+    const procedimientos = [...new Set(data.map(item => item.procedimiento))].sort();
 
     // Mapear los datos añadiendo "jitter" (ruido visual) para que no se superpongan exactamente
     const points = data.map(item => {
