@@ -10,7 +10,7 @@ from playwright.sync_api import sync_playwright
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def extract_price(text):
-    match = re.search(r'Valor subasta:\s*([\d\.]+,\d{2})', text)
+    match = re.search(r'Valor subasta[^0-9]*([\d\.]+,\d{2})', text, re.IGNORECASE)
     if match:
         val_str = match.group(1).replace('.', '').replace(',', '.')
         return float(val_str)
@@ -72,7 +72,8 @@ def run_scraper():
                     link = "https://subastas.boe.es" + a_tag['href'].replace("./", "/")
                     
                     # ID oficial (Ej. SUB-JA-2023-22123)
-                    id_subasta = a_tag.text.strip()
+                    id_match = re.search(r'idSub=(SUB-[a-zA-Z0-9\-]+)', link)
+                    id_subasta = id_match.group(1) if id_match else f"SUB-DESCONOCIDA-{hash(link)%100000}"
                     
                     # Valor
                     valor = extract_price(texto_completo)
