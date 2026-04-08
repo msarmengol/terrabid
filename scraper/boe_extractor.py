@@ -63,7 +63,7 @@ def run_scraper():
                 resultados = soup.find_all('li', class_='resultado-busqueda')
                 logging.info(f"* Encontradas {len(resultados)} subastas activas en {prov['nombre']}.")
                 
-                for res in resultados:
+                for res in resultados[:15]:  # Máximo 15 subastas por provincia para no saturar
                     texto_completo = res.get_text(separator=' ', strip=True)
                     
                     # Referencia oficial / Enlace
@@ -75,13 +75,36 @@ def run_scraper():
                     id_match = re.search(r'idSub=(SUB-[a-zA-Z0-9\-]+)', link)
                     id_subasta = id_match.group(1) if id_match else f"SUB-DESCONOCIDA-{hash(link)%100000}"
                     
-                    # Valor
-                    valor = extract_price(texto_completo)
-                    
-                    # Superficie (Approximada aleatoria si no viene explicitada en el resumen, el BOE suele esconderlo dentro)
-                    # NOTA: En un bot de producción avanzado, aquí tendríamos que hacer "page.goto(link)" por cada propiedad 
-                    # para abrir el detalle y extraer la superficie real.
-                    superficie = float(len(texto_completo) % 50 + 10) 
+                    # Extracción profunda de la Ficha en Vivo (Usando requests sobre la URL directa sin tokens)
+                    import requests
+                    valor = 0.0
+                    superficie = 0.0
+                    try:
+                        ficha_req = requests.get(link, timeout=5)
+                        ficha_text = ficha_req.text
+                        
+                        # Extraer Valor Subasta real o Tasación
+                        v_match = re.search(r'Valor subasta[^0-9]*([\d\.]+,\d{2})', ficha_text, re.IGNORECASE)
+                        if not v_match:
+                            v_match = re.search(r'Cantidad reclamada[^0-9]*([\d\.]+,\d{2})', ficha_text, re.IGNORECASE)
+                            
+                        if v_match:
+                            valor = float(v_match.group(1).replace('.', '').replace(',', '.'))
+                        
+                        # Extraer Superficie de la descripción si la hay
+                        sup_match = re.search(r'superficie.*?de\s*([\d\.,]+)\s*(ha|hectreas|m2|metros)', ficha_text, re.IGNORECASE)
+                        if sup_match:
+                            s_val = float(sup_match.group(1).replace('.', '').replace(',', '.'))
+                            if 'm2' in sup_match.group(2).lower() or 'metros' in sup_match.group(2).lower():
+                                superficie = round(s_val / 10000.0, 2)
+                            else:
+                                superficie = s_val
+                        else:
+                            # Intento de rescate asumiendo hectáreas genéricas para fincas
+                            superficie = 1.0 
+                            
+                    except Exception as err:
+                        logging.warning(f"  - No se pudo acceder a la ficha {id_subasta}: {err}") 
                     
                     # Procedimiento
                     procedimiento = "Subasta Judicial"
