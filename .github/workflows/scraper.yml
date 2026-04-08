@@ -2,7 +2,9 @@ name: Daily Scraper (TerraBid)
 
 on:
   schedule:
+    # Se ejecuta todos los días a las 06:00 y a las 18:00 (UTC)
     - cron: '0 6,18 * * *'
+  # Permite ejecución manual desde la pestaña Actions en GitHub
   workflow_dispatch:
 
 jobs:
@@ -23,6 +25,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           if [ -f scraper/requirements.txt ]; then pip install -r scraper/requirements.txt; fi
+          playwright install chromium
 
       - name: Ejecutar Scraper (BOE)
         run: |
@@ -30,11 +33,17 @@ jobs:
 
       - name: Hacer Commit y Push con los nuevos datos
         run: |
+          # Configura la identidad del robot de Github Action
           git config --local user.name "github-actions[bot]"
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           
+          # Añade data.json si ha sido modificado
           git add data.json
+          
+          # Intenta comitear. Si nada cambió, el flujo sigue gracias a '|| echo'
           git commit -m "Auto-update: Datos de subastas renovados por scraper" || echo "No hay cambios para subir."
+          
+          # Lanza los cambios a la rama main
           git push origin main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
